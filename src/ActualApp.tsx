@@ -1,0 +1,233 @@
+import { useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
+
+class SnowFlake {
+  private RADIUS: number;
+  private getIsFlipped: () => boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private getCtx: () => any;
+  private isPixelHardEnough: (x: number, y: number) => boolean;
+  private x: number;
+  private y: number;
+  public vx: number;
+  public vy: number;
+  private radius: number;
+  private friction: number;
+  private gravity: number;
+
+  constructor(
+    RADIUS: number,
+    gravity: number,
+    isPixelHardEnough: (x: number, y: number) => boolean,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    getCtx: () => any,
+    getIsFlipped: () => boolean,
+  ) {
+    this.RADIUS = RADIUS;
+    this.gravity = gravity;
+    this.getIsFlipped = getIsFlipped;
+    this.getCtx = getCtx;
+    this.isPixelHardEnough = isPixelHardEnough;
+    this.init(true);
+  }
+
+  init(randomY = false) {
+    const RADIUS = this.RADIUS;
+    const angle = Math.random() * Math.PI * 2;
+    const r = Math.sqrt(Math.random()) * (RADIUS - 10);
+
+    this.x = RADIUS / 2 + r * Math.cos(angle);
+    this.y = randomY
+      ? RADIUS / 2 + r * Math.sin(angle)
+      : this.getIsFlipped()
+        ? RADIUS / 2 + RADIUS - 20
+        : RADIUS / 2 - RADIUS + 20;
+
+    this.vx = (Math.random() - 0.5) * 1.5;
+    this.vy = (Math.random() - 0.5) * 1.5;
+    this.radius = Math.random() * 2.5 + 1.5;
+    this.friction = 0.98;
+  }
+
+  update() {
+    const currentGravity = this.getIsFlipped() ? -this.gravity : this.gravity;
+    const prevX = this.x;
+    const prevY = this.y;
+    this.vy += currentGravity;
+    this.vx *= this.friction;
+    this.vy *= this.friction;
+    const nextX = this.x + this.vx;
+    const nextY = this.y + this.vy;
+
+    if (this.isPixelHardEnough(nextX, nextY)) {
+      const canMoveX = !this.isPixelHardEnough(nextX, prevY);
+      const canMoveY = !this.isPixelHardEnough(prevY, nextY);
+
+      if (canMoveX && !canMoveY) {
+        this.y = prevY;
+        this.x = nextX;
+        this.vy *= -0.2;
+      } else if (canMoveY && !canMoveX) {
+        this.x = prevX;
+        this.y = nextY;
+        this.vx += Math.random() - 0.5;
+        this.vy *= -0.2;
+      } else {
+        this.x = prevX;
+        this.y = prevY;
+        this.vx *= -0.5;
+        this.vy *= -0.5;
+      }
+    } else {
+      this.x = nextX;
+      this.y = nextY;
+    }
+    const dx = this.x - this.RADIUS / 2;
+    const dy = this.y - this.RADIUS / 2;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist + this.radius > this.RADIUS) {
+      const nx = dx / dist;
+      const ny = dy / dist;
+
+      this.x = this.RADIUS / 2 + nx * (this.RADIUS - this.radius);
+      this.y = this.RADIUS / 2 + ny * (this.RADIUS - this.radius);
+
+      const dotProduct = this.vx * nx + this.vy * ny;
+      this.vx = this.vx - 2 * dotProduct * nx;
+      this.vy = this.vy - 2 * dotProduct * ny;
+
+      this.vx *= 0.5;
+      this.vy *= 0.5;
+    }
+  }
+  draw() {
+    const ctx = this.getCtx();
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    ctx.fill();
+  }
+}
+
+const TheActualApp = () => {
+  const { name } = useParams();
+
+  const canRef = useRef<HTMLCanvasElement | null>(null);
+  const butRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (!canRef.current) return;
+    if (!butRef.current) return;
+    const canvas = canRef.current;
+    const ctx = canRef.current?.getContext("2d");
+    const btn = butRef.current;
+
+    const MULT = 1.1;
+    canvas.width = canvas.clientWidth * MULT;
+    canvas.height = canvas.clientHeight * MULT;
+
+    const SNOW_COUNT = 1000;
+    let isFlipped = false;
+    const gravity = 0.15;
+
+    const collCanva = document.createElement("canvas");
+
+    collCanva.width = canvas.width;
+    collCanva.height = canvas.height;
+
+    const cCtx = collCanva.getContext("2d");
+
+    let collisionData: ImageDataArray;
+
+    const initCollisionMap = () => {
+      if (!cCtx) return;
+      cCtx?.clearRect(0, 0, canvas.width, canvas.height);
+      cCtx.font = `900 10px sans-serif`;
+      cCtx.textAlign = "center";
+      cCtx.fillStyle = "white";
+      cCtx.fillText(String(name), canvas.width / 2, canvas.height / 2);
+
+      const imageData = cCtx.getImageData(0, 0, canvas.width, canvas.height);
+      collisionData = imageData.data;
+    };
+
+    const isPixelHardEnough = (x: number, y: number) => {
+      const ix = Math.floor(x);
+      const iy = Math.floor(y);
+
+      if (ix < 0 || ix >= canvas.width || iy < 0 || iy >= canvas.height)
+        return false;
+
+      const index = (iy * canvas.width + ix) * 4 + 3;
+      return collisionData[index] > 50;
+    };
+
+    initCollisionMap();
+    const snowflakes: SnowFlake[] = [];
+    for (let i = 0; i < SNOW_COUNT; i++) {
+      snowflakes.push(
+        new SnowFlake(
+          canvas.width,
+          gravity,
+          isPixelHardEnough,
+          () => ctx,
+          () => isFlipped,
+        ),
+      );
+    }
+
+    btn.addEventListener("click", () => {
+      isFlipped = !isFlipped;
+      canvas.classList.toggle("flipped");
+      snowflakes.forEach((f) => {
+        f.vx += (Math.random() - 0.5) * 15;
+        f.vy += (Math.random() - 0.5) * 15;
+      });
+    });
+
+    function animate() {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(
+        canvas.width / 2,
+        canvas.width / 2,
+        canvas.width / 2,
+        0,
+        Math.PI * 2,
+      );
+      ctx.clip();
+
+      snowflakes.forEach((flake) => {
+        flake.update();
+        flake.draw();
+      });
+      ctx.restore();
+
+      requestAnimationFrame(animate);
+    }
+    animate();
+  }, [name]);
+
+  return (
+    <div className="w-svw flex justify-center flex-col items-center h-svh bg-[#0b0b0b] text-white">
+      <div className="w-200 aspect-square flex justify-center items-center overflow-hidden">
+        <canvas
+          className="w-3/4 h-3/4 rounded-full  bg-radial to-[#82C8F2] border-4 border-white/20 from-[#C3E1EB]"
+          ref={canRef}
+        ></canvas>
+      </div>
+      <button
+        ref={butRef}
+        className="bg-blue-600 font-bold border-2 border-white/15 active:bg-blue-500 text-white px-6 py-3 text-3xl rounded-full"
+      >
+        Flip {name ? name : "Globe"}
+      </button>
+    </div>
+  );
+};
+
+export default TheActualApp;

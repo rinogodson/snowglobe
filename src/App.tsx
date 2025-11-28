@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, useParams } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import TheActualApp from "./ActualApp";
 
 function App() {
   return (
@@ -12,9 +13,3 @@ function App() {
 }
 
 export default App;
-
-const TheActualApp = () => {
-  const { name } = useParams();
-
-  return <div>{name ? name : "Hello"}</div>;
-};
