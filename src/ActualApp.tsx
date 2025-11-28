@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import { motion } from "motion/react";
 import { useParams } from "react-router-dom";
 
 class SnowFlake {
@@ -236,12 +235,12 @@ const TheActualApp = () => {
 
   return (
     <div className="w-svw flex justify-center flex-col items-center h-svh relative bg-[#0b0b0b] z-0 text-white">
-      <motion.div className="w-200 aspect-square flex justify-center items-center overflow-hidden">
+      <div className="w-200 aspect-square flex justify-center items-center overflow-hidden">
         <canvas
           className="transition-all duration-500 ease-in w-3/4 h-3/4 rounded-ful backdrop-blur-[10px] border-4 border-white/20 rounded-full  shadow-[inset_50px_100px_50px_20px_rgba(255,255,255,0.3),inset_-50px_-100px_50px_20px_rgba(0,0,0,0.1),inset_0_0_200px_0px_rgba(200,200,255,0.5)]"
           ref={canRef}
         ></canvas>
-      </motion.div>
+      </div>
       <button
         ref={butRef}
         className="bg-blue-600 font-bold border-2 border-white/15 active:bg-blue-500 text-white px-6 py-3 text-3xl rounded-full"
