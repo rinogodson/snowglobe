@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { motion } from "motion/react";
 import { useParams } from "react-router-dom";
 
 class SnowFlake {
@@ -127,9 +128,10 @@ const TheActualApp = () => {
   const { name } = useParams();
 
   const canRef = useRef<HTMLCanvasElement | null>(null);
-  const butRef = useRef<HTMLCanvasElement>(null);
+  const butRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
+    if (!canRef.current) return;
     if (!canRef.current) return;
     if (!butRef.current) return;
     const canvas = canRef.current;
@@ -157,8 +159,8 @@ const TheActualApp = () => {
     const initCollisionMap = () => {
       if (!cCtx) return;
       cCtx?.clearRect(0, 0, canvas.width, canvas.height);
-      cCtx.font = `900 100px sans-serif`;
       cCtx.textAlign = "center";
+      cCtx.font = `900 100px "DynaPuff"`;
       cCtx.fillStyle = "white";
       cCtx.fillText(String(name), canvas.width / 2, canvas.height / 2);
 
@@ -193,11 +195,12 @@ const TheActualApp = () => {
 
     btn.addEventListener("click", () => {
       isFlipped = !isFlipped;
-      canvas.classList.toggle("flipped");
       snowflakes.forEach((f) => {
         f.vx += (Math.random() - 0.5) * 15;
         f.vy += (Math.random() - 0.5) * 15;
       });
+      canvas.style.transition = "transform 0.6s ease-in-out";
+      canvas.style.transform = isFlipped ? "rotate(180deg)" : "rotate(0deg)";
     });
 
     function animate() {
@@ -205,8 +208,8 @@ const TheActualApp = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       ctx.textAlign = "center";
-      ctx.fillStyle = "red";
-      ctx.font = `900 100px sans-serif`;
+      ctx.fillStyle = "#C1C7CD";
+      ctx.font = `900 100px "DynaPuff"`;
       ctx.fillText(String(name), canvas.width / 2, canvas.height / 2);
 
       ctx.save();
@@ -232,19 +235,26 @@ const TheActualApp = () => {
   }, [name]);
 
   return (
-    <div className="w-svw flex justify-center flex-col items-center h-svh bg-[#0b0b0b] text-white">
-      <div className="w-200 aspect-square flex justify-center items-center overflow-hidden">
+    <div className="w-svw flex justify-center flex-col items-center h-svh relative bg-[#0b0b0b] z-0 text-white">
+      <motion.div className="w-200 aspect-square flex justify-center items-center overflow-hidden">
         <canvas
-          className="w-3/4 h-3/4 rounded-full  bg-radial to-[#82C8F2] border-4 border-white/20 from-[#C3E1EB]"
+          className="transition-all duration-500 ease-in w-3/4 h-3/4 rounded-ful backdrop-blur-[10px] border-4 border-white/20 rounded-full  shadow-[inset_50px_100px_50px_20px_rgba(255,255,255,0.3),inset_-50px_-100px_50px_20px_rgba(0,0,0,0.1),inset_0_0_200px_0px_rgba(200,200,255,0.5)]"
           ref={canRef}
         ></canvas>
-      </div>
+      </motion.div>
       <button
         ref={butRef}
         className="bg-blue-600 font-bold border-2 border-white/15 active:bg-blue-500 text-white px-6 py-3 text-3xl rounded-full"
       >
         Flip {name ? name : "Globe"}
       </button>
+      <video
+        src="/bg.mp4"
+        autoPlay
+        muted
+        loop
+        className="absolute w-full -z-1"
+      />
     </div>
   );
 };
