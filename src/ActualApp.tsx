@@ -2,28 +2,28 @@ import { useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 
 class SnowFlake {
-  private RADIUS: number;
+  private canvasSize: number;
   private getIsFlipped: () => boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private getCtx: () => any;
   private isPixelHardEnough: (x: number, y: number) => boolean;
-  private x: number;
-  private y: number;
-  public vx: number;
-  public vy: number;
-  private radius: number;
-  private friction: number;
+  private x: number = 0;
+  private y: number = 0;
+  public vx: number = 0;
+  public vy: number = 0;
+  private radius: number = 0;
+  private friction: number = 0;
   private gravity: number;
 
   constructor(
-    RADIUS: number,
+    canvasSize: number,
     gravity: number,
     isPixelHardEnough: (x: number, y: number) => boolean,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getCtx: () => any,
     getIsFlipped: () => boolean,
   ) {
-    this.RADIUS = RADIUS;
+    this.canvasSize = canvasSize;
     this.gravity = gravity;
     this.getIsFlipped = getIsFlipped;
     this.getCtx = getCtx;
@@ -32,16 +32,22 @@ class SnowFlake {
   }
 
   init(randomY = false) {
-    const RADIUS = this.RADIUS;
-    const angle = Math.random() * Math.PI * 2;
-    const r = Math.sqrt(Math.random()) * (RADIUS - 10);
+    const size = this.canvasSize;
+    const center = size / 2;
+    const geometricRadius = size / 2;
 
-    this.x = RADIUS / 2 + r * Math.cos(angle);
-    this.y = randomY
-      ? RADIUS / 2 + r * Math.sin(angle)
-      : this.getIsFlipped()
-        ? RADIUS / 2 + RADIUS - 20
-        : RADIUS / 2 - RADIUS + 20;
+    const angle = Math.random() * Math.PI * 2;
+    const r = Math.sqrt(Math.random()) * (geometricRadius - 10);
+
+    this.x = center + r * Math.cos(angle);
+
+    if (randomY) {
+      this.y = center + r * Math.sin(angle);
+    } else {
+      this.y = this.getIsFlipped()
+        ? center + geometricRadius - 20
+        : center - geometricRadius + 20;
+    }
 
     this.vx = (Math.random() - 0.5) * 1.5;
     this.vy = (Math.random() - 0.5) * 1.5;
@@ -53,9 +59,11 @@ class SnowFlake {
     const currentGravity = this.getIsFlipped() ? -this.gravity : this.gravity;
     const prevX = this.x;
     const prevY = this.y;
+
     this.vy += currentGravity;
     this.vx *= this.friction;
     this.vy *= this.friction;
+
     const nextX = this.x + this.vx;
     const nextY = this.y + this.vy;
 
@@ -82,16 +90,19 @@ class SnowFlake {
       this.x = nextX;
       this.y = nextY;
     }
-    const dx = this.x - this.RADIUS / 2;
-    const dy = this.y - this.RADIUS / 2;
+
+    const center = this.canvasSize / 2;
+    const geometricRadius = this.canvasSize / 2;
+    const dx = this.x - center;
+    const dy = this.y - center;
     const dist = Math.sqrt(dx * dx + dy * dy);
 
-    if (dist + this.radius > this.RADIUS) {
+    if (dist + this.radius > geometricRadius) {
       const nx = dx / dist;
       const ny = dy / dist;
 
-      this.x = this.RADIUS / 2 + nx * (this.RADIUS - this.radius);
-      this.y = this.RADIUS / 2 + ny * (this.RADIUS - this.radius);
+      this.x = center + nx * (geometricRadius - this.radius);
+      this.y = center + ny * (geometricRadius - this.radius);
 
       const dotProduct = this.vx * nx + this.vy * ny;
       this.vx = this.vx - 2 * dotProduct * nx;
@@ -101,8 +112,10 @@ class SnowFlake {
       this.vy *= 0.5;
     }
   }
+
   draw() {
     const ctx = this.getCtx();
+    if (!ctx) return;
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
@@ -121,6 +134,7 @@ const TheActualApp = () => {
     if (!butRef.current) return;
     const canvas = canRef.current;
     const ctx = canRef.current?.getContext("2d");
+    if (!ctx) return;
     const btn = butRef.current;
 
     const MULT = 1.1;
@@ -143,7 +157,7 @@ const TheActualApp = () => {
     const initCollisionMap = () => {
       if (!cCtx) return;
       cCtx?.clearRect(0, 0, canvas.width, canvas.height);
-      cCtx.font = `900 10px sans-serif`;
+      cCtx.font = `900 100px sans-serif`;
       cCtx.textAlign = "center";
       cCtx.fillStyle = "white";
       cCtx.fillText(String(name), canvas.width / 2, canvas.height / 2);
@@ -189,6 +203,11 @@ const TheActualApp = () => {
     function animate() {
       if (!ctx) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.textAlign = "center";
+      ctx.fillStyle = "red";
+      ctx.font = `900 100px sans-serif`;
+      ctx.fillText(String(name), canvas.width / 2, canvas.height / 2);
 
       ctx.save();
       ctx.beginPath();
