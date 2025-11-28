@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 
 class SnowFlake {
@@ -36,18 +36,20 @@ class SnowFlake {
     const center = size / 2;
     const geometricRadius = size / 2;
 
-    const angle = Math.random() * Math.PI * 2;
-    const r = Math.sqrt(Math.random()) * (geometricRadius - 10);
+    do {
+      const angle = Math.random() * Math.PI * 2;
+      const r = Math.sqrt(Math.random()) * (geometricRadius - 10);
 
-    this.x = center + r * Math.cos(angle);
+      this.x = center + r * Math.cos(angle);
 
-    if (randomY) {
-      this.y = center + r * Math.sin(angle);
-    } else {
-      this.y = this.getIsFlipped()
-        ? center + geometricRadius - 20
-        : center - geometricRadius + 20;
-    }
+      if (randomY) {
+        this.y = center + r * Math.sin(angle);
+      } else {
+        this.y = this.getIsFlipped()
+          ? center + geometricRadius - 20
+          : center - geometricRadius + 20;
+      }
+    } while (this.isPixelHardEnough(this.x, this.y));
 
     this.vx = (Math.random() - 0.5) * 1.5;
     this.vy = (Math.random() - 0.5) * 1.5;
@@ -129,24 +131,36 @@ const TheActualApp = () => {
   const canRef = useRef<HTMLCanvasElement | null>(null);
   const butRef = useRef<HTMLButtonElement>(null);
 
+  const [fontLoaded, setFontLoaded] = useState(false);
+
+  useEffect(() => {
+    document.fonts.ready.then(() => {
+      setFontLoaded(true);
+    });
+  }, []);
+
   useEffect(() => {
     if (!canRef.current) return;
     if (!canRef.current) return;
     if (!butRef.current) return;
+    if (!fontLoaded) return;
     const canvas = canRef.current;
     const ctx = canRef.current?.getContext("2d");
     if (!ctx) return;
     const btn = butRef.current;
 
-    const MULT = 1.1;
-    canvas.width = canvas.clientWidth * MULT;
-    canvas.height = canvas.clientHeight * MULT;
-
-    const SNOW_COUNT = 1000;
+    const SNOW_COUNT = 2000;
     let isFlipped = false;
-    const gravity = 0.15;
+    const gravity = 0.2;
 
     const collCanva = document.createElement("canvas");
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+
+    const MULT = 0.7;
+
+    canvas.width = rect.width * dpr * MULT;
+    canvas.height = rect.height * dpr * MULT;
 
     collCanva.width = canvas.width;
     collCanva.height = canvas.height;
@@ -154,13 +168,15 @@ const TheActualApp = () => {
     const cCtx = collCanva.getContext("2d");
 
     let collisionData: ImageDataArray;
+    const fontSize = Math.min(canvas.width * 0.2, 120);
 
     const initCollisionMap = () => {
       if (!cCtx) return;
       cCtx?.clearRect(0, 0, canvas.width, canvas.height);
       cCtx.textAlign = "center";
-      cCtx.font = `900 100px "DynaPuff"`;
+      cCtx.font = `900 ${fontSize}px "DynaPuff"`;
       cCtx.fillStyle = "white";
+      cCtx.textBaseline = "middle";
       cCtx.fillText(String(name), canvas.width / 2, canvas.height / 2);
 
       const imageData = cCtx.getImageData(0, 0, canvas.width, canvas.height);
@@ -192,7 +208,7 @@ const TheActualApp = () => {
       );
     }
 
-    btn.addEventListener("click", () => {
+    const handleBtn = () => {
       isFlipped = !isFlipped;
       snowflakes.forEach((f) => {
         f.vx += (Math.random() - 0.5) * 15;
@@ -200,7 +216,9 @@ const TheActualApp = () => {
       });
       canvas.style.transition = "transform 0.6s ease-in-out";
       canvas.style.transform = isFlipped ? "rotate(180deg)" : "rotate(0deg)";
-    });
+    };
+
+    btn.addEventListener("click", handleBtn);
 
     function animate() {
       if (!ctx) return;
@@ -208,7 +226,8 @@ const TheActualApp = () => {
 
       ctx.textAlign = "center";
       ctx.fillStyle = "#C1C7CD";
-      ctx.font = `900 100px "DynaPuff"`;
+      ctx.font = `900 ${fontSize}px "DynaPuff"`;
+      ctx.textBaseline = "middle";
       ctx.fillText(String(name), canvas.width / 2, canvas.height / 2);
 
       ctx.save();
@@ -231,13 +250,17 @@ const TheActualApp = () => {
       requestAnimationFrame(animate);
     }
     animate();
-  }, [name]);
+
+    return () => {
+      btn.removeEventListener("click", handleBtn);
+    };
+  }, [fontLoaded, name]);
 
   return (
-    <div className="w-svw flex justify-center flex-col items-center h-svh relative bg-[#0b0b0b] z-0 text-white">
-      <div className="w-200 aspect-square flex justify-center items-center overflow-hidden">
+    <div className="w-screen flex justify-center overflow-hidden flex-col items-center h-svh relative bg-[#0b0b0b] z-0 text-white">
+      <div className="sm:w-200 w-full aspect-square flex justify-center items-center overflow-hidden">
         <canvas
-          className="transition-all duration-500 ease-in w-3/4 h-3/4 rounded-ful backdrop-blur-[10px] border-4 border-white/20 rounded-full  shadow-[inset_50px_100px_50px_20px_rgba(255,255,255,0.3),inset_-50px_-100px_50px_20px_rgba(0,0,0,0.1),inset_0_0_200px_0px_rgba(200,200,255,0.5)]"
+          className="transition-all duration-500 ease-in w-9/10 sm:w-3/4 aspect-square backdrop-blur-[10px] border-4 border-white/20 rounded-full  shadow-[inset_50px_100px_50px_20px_rgba(255,255,255,0.3),inset_-50px_-100px_50px_20px_rgba(0,0,0,0.1),inset_0_0_200px_0px_rgba(200,200,255,0.5)]"
           ref={canRef}
         ></canvas>
       </div>
@@ -252,7 +275,8 @@ const TheActualApp = () => {
         autoPlay
         muted
         loop
-        className="absolute w-full -z-1"
+        playsInline
+        className="absolute h-full sm:w-full -z-1 object-cover"
       />
     </div>
   );
