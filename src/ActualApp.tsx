@@ -1,5 +1,10 @@
+import { spring } from "motion";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
+
+interface DeviceOrientationEventiOS extends DeviceOrientationEvent {
+  requestPermission?: () => Promise<"granted" | "denied">;
+}
 
 class SnowFlake {
   private canvasSize: number;
@@ -129,16 +134,65 @@ const TheActualApp = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   let name = queryParams.get("name");
+  const isFlipped = useRef(false);
+
+  const [flipped, setFlipped] = useState(false);
+
+  const [permission, setPermission] = useState(false);
+
   if (!name) name = "SnowGlobe";
   if (name.length > 14) {
     name = name.slice(0, 14);
   }
 
   const canRef = useRef<HTMLCanvasElement | null>(null);
-  const blurRef = useRef<HTMLDivElement | null>(null);
   const butRef = useRef<HTMLButtonElement>(null);
 
   const [fontLoaded, setFontLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!permission) return;
+    const handleOr = (e: DeviceOrientationEvent) => {
+      const beta = e.beta;
+      if (beta === null) return;
+      const isUpsideDown = Math.abs(beta) > 150;
+      const isUpright = Math.abs(beta) < 120;
+      if (isUpsideDown && !isFlipped.current) {
+        isFlipped.current = true;
+        setFlipped(true);
+      } else if (isUpright && isFlipped.current) {
+        isFlipped.current = false;
+        setFlipped(false);
+      }
+    };
+
+    window.addEventListener("deviceorientation", handleOr);
+    return () => {
+      window.removeEventListener("deviceorientation", handleOr);
+    };
+  }, [permission]);
+
+  const handleRequestPermission = async () => {
+    if (
+      typeof (DeviceOrientationEvent as unknown as DeviceOrientationEventiOS)
+        .requestPermission === "function"
+    ) {
+      try {
+        const permissionState = await (
+          DeviceOrientationEvent as unknown as DeviceOrientationEventiOS
+        ).requestPermission();
+        if (permissionState === "granted") {
+          setPermission(true);
+        } else {
+          alert("Permission denied. You can still tap the button manually.");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      setPermission(true);
+    }
+  };
 
   useEffect(() => {
     document.fonts.ready.then(() => {
@@ -156,7 +210,7 @@ const TheActualApp = () => {
     const btn = butRef.current;
 
     const SNOW_COUNT = 5000;
-    let isFlipped = false;
+
     const gravity = 0.2;
 
     const collCanva = document.createElement("canvas");
@@ -227,7 +281,7 @@ const TheActualApp = () => {
             gravity,
             isPixelHardEnough,
             () => ctx,
-            () => isFlipped,
+            () => isFlipped.current,
           ),
         );
       }
@@ -236,19 +290,15 @@ const TheActualApp = () => {
     };
 
     const handleBtn = () => {
-      isFlipped = !isFlipped;
+      isFlipped.current = !isFlipped.current;
+      if (!permission) {
+        handleRequestPermission();
+      }
+      setFlipped(isFlipped.current);
       snowflakes.forEach((f) => {
         f.vx += (Math.random() - 0.5) * 15;
         f.vy += (Math.random() - 0.5) * 15;
       });
-      canvas.style.transition = "transform 0.6s ease-in-out";
-      canvas.style.transform = isFlipped ? "rotate(180deg)" : "rotate(0deg)";
-      if (blurRef.current) {
-        blurRef.current.style.transition = "transform 0.6s ease-in-out";
-        blurRef.current.style.transform = isFlipped
-          ? "rotate(180deg)"
-          : "rotate(0deg)";
-      }
     };
 
     btn.addEventListener("click", handleBtn);
@@ -321,26 +371,30 @@ const TheActualApp = () => {
       btn.removeEventListener("click", handleBtn);
       cancelAnimationFrame(animationFrameId);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fontLoaded, name]);
 
   return (
     <div className="w-screen flex justify-center overflow-hidden flex-col items-center h-svh relative bg-[#0b0b0b] z-0 text-white">
       <div className="w-full max-w-[800px] aspect-square flex justify-center items-center overflow-hidden">
         <div className="relative w-9/10 sm:w-3/4 rounded-full aspect-square shadow-[inset_0_20px_20px_-10px_rgba(255,255,255,0.9),inset_20px_0_40px_rgba(255,255,255,0.4),inset_-20px_-30px_40px_rgba(50,0,0,0.1),inset_0_-2px_10px_rgba(255,255,255,0.3),inset_0_0_50px_20px_rgba(0,0,0,0.5),inset_50px_100px_50px_20px_rgba(255,255,255,0.3),inset_-50px_-100px_50px_20px_rgba(0,0,0,0.1),inset_0_0_200px_0px_rgba(200,200,255,0.5)]">
-          <div className="bg-[#551C00] w-5/10 translate-y-[50%] translate-x-[-50%] left-[50%] h-20 absolute bottom-0 z-101"></div>
           <canvas
+            style={{
+              rotate: flipped ? "180deg" : "0deg",
+              transition: "all " + spring(0.5, 0.2),
+            }}
             className="transition-all z-100 absolute bg-white/10 duration-500 ease-in w-full aspect-square backdrop-contrast-125 border-4 border-white/20 rounded-full  "
             ref={canRef}
           ></canvas>
           <div
-            ref={blurRef}
+            style={{ rotate: flipped ? "180deg" : "0deg" }}
             className="w-full aspect-square absolute inset-0 rounded-full backdrop-blur-sm mask-[radial-gradient(circle,rgba(0,0,0,0)0%,rgba(0,0,0,1)66%)]"
           ></div>
         </div>
       </div>
       <button
         ref={butRef}
-        className=" bg-blue-600 sm:flex hidden font-bold border-2 border-white/15 active:bg-blue-500 text-white  text-3xl rounded-full"
+        className=" bg-blue-600 sm:flex font-bold border-2 border-white/15 active:bg-blue-500 text-white  text-3xl rounded-full"
       >
         <p className="px-6 py-3 w-full h-full transition-all duration-200">
           Flip SnowGlobe
