@@ -166,11 +166,11 @@ const TheActualApp = () => {
   useEffect(() => {
     if (!permission) return;
     const handleOr = (e: DeviceOrientationEvent) => {
-      const alpha = e.alpha;
-      if (alpha === null) return;
+      const beta = e.beta;
+      if (beta === null) return;
       setShowButton((prev) => (prev ? false : prev));
-      const isUpsideDown = Math.abs(alpha) > 150;
-      const isUpright = Math.abs(alpha) < 120;
+      const isUpsideDown = beta < -60;
+      const isUpright = beta > 60;
       if (isUpsideDown && !isFlipped.current) {
         isFlipped.current = true;
         snowflakes.current.forEach((f: SnowFlake) => {
@@ -232,7 +232,7 @@ const TheActualApp = () => {
     if (!ctx) return;
     const btn = butRef.current;
 
-    const SNOW_COUNT = 1000;
+    const SNOW_COUNT = 2000;
 
     const gravity = 0.2;
 
