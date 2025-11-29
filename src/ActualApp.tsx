@@ -137,6 +137,7 @@ const TheActualApp = () => {
   const isFlipped = useRef(false);
 
   const [flipped, setFlipped] = useState(false);
+  const [showButton, setShowButton] = useState(true);
 
   const [permission, setPermission] = useState(false);
 
@@ -150,19 +151,38 @@ const TheActualApp = () => {
 
   const [fontLoaded, setFontLoaded] = useState(false);
 
+  const snowflakes = useRef<SnowFlake[]>([]);
+
+  useEffect(() => {
+    if (
+      typeof DeviceOrientationEvent !== "undefined" &&
+      typeof (DeviceOrientationEvent as unknown as DeviceOrientationEventiOS)
+        .requestPermission !== "function"
+    ) {
+      setPermission(true);
+    }
+  }, []);
+
   useEffect(() => {
     if (!permission) return;
     const handleOr = (e: DeviceOrientationEvent) => {
-      const beta = e.beta;
-      if (beta === null) return;
-      const isUpsideDown = Math.abs(beta) > 150;
-      const isUpright = Math.abs(beta) < 120;
+      const alpha = e.alpha;
+      if (alpha === null) return;
+      setShowButton((prev) => (prev ? false : prev));
+      const isUpsideDown = Math.abs(alpha) > 150;
+      const isUpright = Math.abs(alpha) < 120;
       if (isUpsideDown && !isFlipped.current) {
         isFlipped.current = true;
-        setFlipped(true);
+        snowflakes.current.forEach((f: SnowFlake) => {
+          f.vx += (Math.random() - 0.5) * 15;
+          f.vy += (Math.random() - 0.5) * 15;
+        });
       } else if (isUpright && isFlipped.current) {
         isFlipped.current = false;
-        setFlipped(false);
+        snowflakes.current.forEach((f: SnowFlake) => {
+          f.vx += (Math.random() - 0.5) * 15;
+          f.vy += (Math.random() - 0.5) * 15;
+        });
       }
     };
 
@@ -178,11 +198,14 @@ const TheActualApp = () => {
         .requestPermission === "function"
     ) {
       try {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
         const permissionState = await (
           DeviceOrientationEvent as unknown as DeviceOrientationEventiOS
         ).requestPermission();
         if (permissionState === "granted") {
           setPermission(true);
+          setShowButton(false);
         } else {
           alert("Permission denied. You can still tap the button manually.");
         }
@@ -270,12 +293,10 @@ const TheActualApp = () => {
       return collisionData[index] > 50;
     };
 
-    const snowflakes: SnowFlake[] = [];
-
     base.onload = () => {
       initCollisionMap();
       for (let i = 0; i < SNOW_COUNT; i++) {
-        snowflakes.push(
+        snowflakes.current.push(
           new SnowFlake(
             canvas.width,
             gravity,
@@ -295,7 +316,7 @@ const TheActualApp = () => {
         handleRequestPermission();
       }
       setFlipped(isFlipped.current);
-      snowflakes.forEach((f) => {
+      snowflakes.current.forEach((f) => {
         f.vx += (Math.random() - 0.5) * 15;
         f.vy += (Math.random() - 0.5) * 15;
       });
@@ -330,7 +351,7 @@ const TheActualApp = () => {
       );
       ctx.clip();
 
-      snowflakes.forEach((flake) => {
+      snowflakes.current.forEach((flake) => {
         flake.update();
         flake.draw();
       });
@@ -392,14 +413,16 @@ const TheActualApp = () => {
           ></div>
         </div>
       </div>
-      <button
-        ref={butRef}
-        className=" bg-blue-600 sm:flex font-bold border-2 border-white/15 active:bg-blue-500 text-white  text-3xl rounded-full"
-      >
-        <p className="px-6 py-3 w-full h-full transition-all duration-200">
-          Flip SnowGlobe
-        </p>
-      </button>
+      {showButton && (
+        <button
+          ref={butRef}
+          className=" bg-blue-600 sm:flex font-bold border-2 border-white/15 active:bg-blue-500 text-white  text-3xl rounded-full"
+        >
+          <p className="px-6 py-3 w-full h-full transition-all duration-200">
+            Flip SnowGlobe
+          </p>
+        </button>
+      )}
       <video
         src="/bg.mp4"
         autoPlay
