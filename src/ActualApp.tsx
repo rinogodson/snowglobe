@@ -161,7 +161,7 @@ const TheActualApp = () => {
 
     const collCanva = document.createElement("canvas");
     const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
+    const fixedWidth = 800;
 
     const snowman = new Image();
     snowman.src = "/snowman.webp";
@@ -172,8 +172,8 @@ const TheActualApp = () => {
 
     const MULT = 0.7;
 
-    canvas.width = rect.width * dpr * MULT;
-    canvas.height = rect.height * dpr * MULT;
+    canvas.width = fixedWidth * dpr * MULT;
+    canvas.height = fixedWidth * dpr * MULT;
 
     collCanva.width = canvas.width;
     collCanva.height = canvas.height;
@@ -240,6 +240,8 @@ const TheActualApp = () => {
 
     btn.addEventListener("click", handleBtn);
 
+    let animationFrameId: number;
+
     function animate() {
       if (!ctx) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -294,21 +296,22 @@ const TheActualApp = () => {
       });
       ctx.restore();
 
-      requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
     }
     animate();
 
     return () => {
       btn.removeEventListener("click", handleBtn);
+      cancelAnimationFrame(animationFrameId);
     };
   }, [fontLoaded, name]);
 
   return (
     <div className="w-screen flex justify-center overflow-hidden flex-col items-center h-svh relative bg-[#0b0b0b] z-0 text-white">
-      <div className="sm:w-200 w-full aspect-square flex justify-center items-center overflow-hidden">
+      <div className="w-full max-w-[800px] aspect-square flex justify-center items-center overflow-hidden">
         <div className="relative w-9/10 sm:w-3/4 rounded-full aspect-square shadow-[inset_0_20px_20px_-10px_rgba(255,255,255,0.9),inset_20px_0_40px_rgba(255,255,255,0.4),inset_-20px_-30px_40px_rgba(50,0,0,0.1),inset_0_-2px_10px_rgba(255,255,255,0.3),inset_0_0_50px_20px_rgba(0,0,0,0.5),inset_50px_100px_50px_20px_rgba(255,255,255,0.3),inset_-50px_-100px_50px_20px_rgba(0,0,0,0.1),inset_0_0_200px_0px_rgba(200,200,255,0.5)]">
           <canvas
-            className="transition-all z-100 absolute duration-500 ease-in w-full aspect-square backdrop-contrast-125 border-4 border-white/20 rounded-full  "
+            className="transition-all z-100 absolute bg-white/10 duration-500 ease-in w-full aspect-square backdrop-contrast-125 border-4 border-white/20 rounded-full  "
             ref={canRef}
           ></canvas>
           <div
@@ -329,7 +332,7 @@ const TheActualApp = () => {
         muted
         loop
         playsInline
-        className="absolute h-full sm:w-full -z-1 object-cover"
+        className="absolute h-full sm:w-full -z-1 object-cover "
       />
     </div>
   );
