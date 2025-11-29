@@ -53,7 +53,7 @@ class SnowFlake {
 
     this.vx = (Math.random() - 0.5) * 1.5;
     this.vy = (Math.random() - 0.5) * 1.5;
-    this.radius = Math.random() * 2.5 + 1.5;
+    this.radius = Math.random() * 2 + 0.8;
     this.friction = 0.98;
   }
 
@@ -160,7 +160,6 @@ const TheActualApp = () => {
     const gravity = 0.2;
 
     const collCanva = document.createElement("canvas");
-    const dpr = window.devicePixelRatio || 1;
     const fixedWidth = 800;
 
     const snowman = new Image();
@@ -170,17 +169,17 @@ const TheActualApp = () => {
     const base = new Image();
     base.src = "/base.webp";
 
-    const MULT = 0.7;
+    const MULT = 1;
 
-    canvas.width = fixedWidth * dpr * MULT;
-    canvas.height = fixedWidth * dpr * MULT;
+    canvas.width = fixedWidth * MULT;
+    canvas.height = fixedWidth * MULT;
 
     collCanva.width = canvas.width;
     collCanva.height = canvas.height;
 
     const cCtx = collCanva.getContext("2d");
 
-    const fontSize = Math.min(canvas.width * 0.2, 120);
+    const fontSize = Math.min(canvas.width * 0.1, 120);
     let collisionData: ImageDataArray;
 
     const initCollisionMap = () => {
@@ -261,7 +260,7 @@ const TheActualApp = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       ctx.strokeStyle = "#41648A";
-      ctx.lineWidth = 20;
+      ctx.lineWidth = 12;
       ctx.strokeText(String(name), canvas.width / 2, canvas.height / 2 - 120);
 
       ctx.textAlign = "center";
@@ -295,7 +294,7 @@ const TheActualApp = () => {
         baseW * (base.height / base.width),
       );
 
-      const igW = 350;
+      const igW = 300;
       ctx.drawImage(
         ig,
         canvas.width / 2 - igW + 40,
@@ -304,7 +303,7 @@ const TheActualApp = () => {
         igW * (ig.height / ig.width),
       );
 
-      const snowmanW = 280;
+      const snowmanW = 250;
       ctx.drawImage(
         snowman,
         canvas.width / 2 + snowmanW / 7,
@@ -328,6 +327,7 @@ const TheActualApp = () => {
     <div className="w-screen flex justify-center overflow-hidden flex-col items-center h-svh relative bg-[#0b0b0b] z-0 text-white">
       <div className="w-full max-w-[800px] aspect-square flex justify-center items-center overflow-hidden">
         <div className="relative w-9/10 sm:w-3/4 rounded-full aspect-square shadow-[inset_0_20px_20px_-10px_rgba(255,255,255,0.9),inset_20px_0_40px_rgba(255,255,255,0.4),inset_-20px_-30px_40px_rgba(50,0,0,0.1),inset_0_-2px_10px_rgba(255,255,255,0.3),inset_0_0_50px_20px_rgba(0,0,0,0.5),inset_50px_100px_50px_20px_rgba(255,255,255,0.3),inset_-50px_-100px_50px_20px_rgba(0,0,0,0.1),inset_0_0_200px_0px_rgba(200,200,255,0.5)]">
+          <div className="bg-[#551C00] w-5/10 translate-y-[50%] translate-x-[-50%] left-[50%] h-20 absolute bottom-0 z-101"></div>
           <canvas
             className="transition-all z-100 absolute bg-white/10 duration-500 ease-in w-full aspect-square backdrop-contrast-125 border-4 border-white/20 rounded-full  "
             ref={canRef}
@@ -340,9 +340,11 @@ const TheActualApp = () => {
       </div>
       <button
         ref={butRef}
-        className="bg-blue-600 font-bold border-2 border-white/15 active:bg-blue-500 text-white px-6 py-3 text-3xl rounded-full"
+        className=" bg-blue-600 sm:flex hidden font-bold border-2 border-white/15 active:bg-blue-500 text-white  text-3xl rounded-full"
       >
-        Flip SnowGlobe
+        <p className="px-6 py-3 w-full h-full transition-all duration-200">
+          Flip SnowGlobe
+        </p>
       </button>
       <video
         src="/bg.mp4"
