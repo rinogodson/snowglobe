@@ -130,8 +130,8 @@ const TheActualApp = () => {
   const queryParams = new URLSearchParams(location.search);
   let name = queryParams.get("name");
   if (!name) name = "SnowGlobe";
-  if (name.length > 8) {
-    name = name.slice(0, 10);
+  if (name.length > 14) {
+    name = name.slice(0, 14);
   }
 
   const canRef = useRef<HTMLCanvasElement | null>(null);
@@ -155,7 +155,7 @@ const TheActualApp = () => {
     if (!ctx) return;
     const btn = butRef.current;
 
-    const SNOW_COUNT = 2000;
+    const SNOW_COUNT = 5000;
     let isFlipped = false;
     const gravity = 0.2;
 
@@ -186,6 +186,16 @@ const TheActualApp = () => {
     const initCollisionMap = () => {
       if (!cCtx) return;
       cCtx?.clearRect(0, 0, canvas.width, canvas.height);
+
+      const baseW = canvas.width;
+      cCtx.drawImage(
+        base,
+        canvas.width / 2 - baseW / 2,
+        canvas.height - baseW * (base.height / base.width) + 30,
+        baseW,
+        baseW * (base.height / base.width),
+      );
+
       cCtx.textAlign = "center";
       cCtx.font = `900 ${fontSize}px "DynaPuff"`;
       cCtx.fillStyle = "white";
@@ -207,20 +217,24 @@ const TheActualApp = () => {
       return collisionData[index] > 50;
     };
 
-    initCollisionMap();
-
     const snowflakes: SnowFlake[] = [];
-    for (let i = 0; i < SNOW_COUNT; i++) {
-      snowflakes.push(
-        new SnowFlake(
-          canvas.width,
-          gravity,
-          isPixelHardEnough,
-          () => ctx,
-          () => isFlipped,
-        ),
-      );
-    }
+
+    base.onload = () => {
+      initCollisionMap();
+      for (let i = 0; i < SNOW_COUNT; i++) {
+        snowflakes.push(
+          new SnowFlake(
+            canvas.width,
+            gravity,
+            isPixelHardEnough,
+            () => ctx,
+            () => isFlipped,
+          ),
+        );
+      }
+
+      animate();
+    };
 
     const handleBtn = () => {
       isFlipped = !isFlipped;
@@ -246,35 +260,12 @@ const TheActualApp = () => {
       if (!ctx) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const baseW = canvas.width;
-      ctx.drawImage(
-        base,
-        canvas.width / 2 - baseW / 2,
-        canvas.height - baseW * (base.height / base.width) + 30,
-        baseW,
-        baseW * (base.height / base.width),
-      );
-
-      const snowmanW = 200;
-      ctx.drawImage(
-        snowman,
-        canvas.width / 2 + snowmanW / 3,
-        canvas.height - snowmanW * (snowman.height / snowman.width) - 100,
-        snowmanW,
-        snowmanW * (snowman.height / snowman.width),
-      );
-
-      const igW = 200;
-      ctx.drawImage(
-        ig,
-        canvas.width / 2 - igW,
-        canvas.height - igW * (ig.height / ig.width) - 120,
-        igW,
-        igW * (ig.height / ig.width),
-      );
+      ctx.strokeStyle = "#41648A";
+      ctx.lineWidth = 20;
+      ctx.strokeText(String(name), canvas.width / 2, canvas.height / 2 - 120);
 
       ctx.textAlign = "center";
-      ctx.fillStyle = "#C1C7CD";
+      ctx.fillStyle = "#E7EDEF";
       ctx.font = `900 ${fontSize}px "DynaPuff"`;
       ctx.textBaseline = "middle";
       ctx.fillText(String(name), canvas.width / 2, canvas.height / 2 - 120);
@@ -294,11 +285,38 @@ const TheActualApp = () => {
         flake.update();
         flake.draw();
       });
+
+      const baseW = canvas.width;
+      ctx.drawImage(
+        base,
+        canvas.width / 2 - baseW / 2,
+        canvas.height - baseW * (base.height / base.width) + 30,
+        baseW,
+        baseW * (base.height / base.width),
+      );
+
+      const igW = 350;
+      ctx.drawImage(
+        ig,
+        canvas.width / 2 - igW + 40,
+        canvas.height - igW * (ig.height / ig.width) - 180,
+        igW,
+        igW * (ig.height / ig.width),
+      );
+
+      const snowmanW = 280;
+      ctx.drawImage(
+        snowman,
+        canvas.width / 2 + snowmanW / 7,
+        canvas.height - snowmanW * (snowman.height / snowman.width) - 120,
+        snowmanW,
+        snowmanW * (snowman.height / snowman.width),
+      );
+
       ctx.restore();
 
       animationFrameId = requestAnimationFrame(animate);
     }
-    animate();
 
     return () => {
       btn.removeEventListener("click", handleBtn);
@@ -324,7 +342,7 @@ const TheActualApp = () => {
         ref={butRef}
         className="bg-blue-600 font-bold border-2 border-white/15 active:bg-blue-500 text-white px-6 py-3 text-3xl rounded-full"
       >
-        Flip {name ? name : "Globe"}
+        Flip SnowGlobe
       </button>
       <video
         src="/bg.mp4"
@@ -334,6 +352,18 @@ const TheActualApp = () => {
         playsInline
         className="absolute h-full sm:w-full -z-1 object-cover "
       />
+      <div
+        style={{
+          fontFamily: '"DynaPuff"',
+          fontWeight: 900,
+          position: "absolute",
+          opacity: 0,
+          pointerEvents: "none",
+        }}
+      >
+        AVOID LOOKING AT THIS PART OF MY CODE! THIS IS A DUMB Text to Force
+        FontLoad
+      </div>
     </div>
   );
 };
