@@ -5,7 +5,6 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/:name" element=<TheActualApp /> />
         <Route path="/" element={<TheActualApp />} />
       </Routes>
     </BrowserRouter>

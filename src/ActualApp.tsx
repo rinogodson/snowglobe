@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 class SnowFlake {
   private canvasSize: number;
@@ -126,9 +126,16 @@ class SnowFlake {
 }
 
 const TheActualApp = () => {
-  const { name } = useParams();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  let name = queryParams.get("name");
+  if (!name) name = "SnowGlobe";
+  if (name.length > 8) {
+    name = name.slice(0, 10);
+  }
 
   const canRef = useRef<HTMLCanvasElement | null>(null);
+  const blurRef = useRef<HTMLDivElement | null>(null);
   const butRef = useRef<HTMLButtonElement>(null);
 
   const [fontLoaded, setFontLoaded] = useState(false);
@@ -140,7 +147,6 @@ const TheActualApp = () => {
   }, []);
 
   useEffect(() => {
-    if (!canRef.current) return;
     if (!canRef.current) return;
     if (!butRef.current) return;
     if (!fontLoaded) return;
@@ -157,6 +163,13 @@ const TheActualApp = () => {
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
 
+    const snowman = new Image();
+    snowman.src = "/snowman.webp";
+    const ig = new Image();
+    ig.src = "/ig.webp";
+    const base = new Image();
+    base.src = "/base.webp";
+
     const MULT = 0.7;
 
     canvas.width = rect.width * dpr * MULT;
@@ -167,8 +180,8 @@ const TheActualApp = () => {
 
     const cCtx = collCanva.getContext("2d");
 
-    let collisionData: ImageDataArray;
     const fontSize = Math.min(canvas.width * 0.2, 120);
+    let collisionData: ImageDataArray;
 
     const initCollisionMap = () => {
       if (!cCtx) return;
@@ -177,7 +190,7 @@ const TheActualApp = () => {
       cCtx.font = `900 ${fontSize}px "DynaPuff"`;
       cCtx.fillStyle = "white";
       cCtx.textBaseline = "middle";
-      cCtx.fillText(String(name), canvas.width / 2, canvas.height / 2);
+      cCtx.fillText(String(name), canvas.width / 2, canvas.height / 2 - 120);
 
       const imageData = cCtx.getImageData(0, 0, canvas.width, canvas.height);
       collisionData = imageData.data;
@@ -195,6 +208,7 @@ const TheActualApp = () => {
     };
 
     initCollisionMap();
+
     const snowflakes: SnowFlake[] = [];
     for (let i = 0; i < SNOW_COUNT; i++) {
       snowflakes.push(
@@ -216,6 +230,12 @@ const TheActualApp = () => {
       });
       canvas.style.transition = "transform 0.6s ease-in-out";
       canvas.style.transform = isFlipped ? "rotate(180deg)" : "rotate(0deg)";
+      if (blurRef.current) {
+        blurRef.current.style.transition = "transform 0.6s ease-in-out";
+        blurRef.current.style.transform = isFlipped
+          ? "rotate(180deg)"
+          : "rotate(0deg)";
+      }
     };
 
     btn.addEventListener("click", handleBtn);
@@ -224,11 +244,38 @@ const TheActualApp = () => {
       if (!ctx) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+      const baseW = canvas.width;
+      ctx.drawImage(
+        base,
+        canvas.width / 2 - baseW / 2,
+        canvas.height - baseW * (base.height / base.width) + 30,
+        baseW,
+        baseW * (base.height / base.width),
+      );
+
+      const snowmanW = 200;
+      ctx.drawImage(
+        snowman,
+        canvas.width / 2 + snowmanW / 3,
+        canvas.height - snowmanW * (snowman.height / snowman.width) - 100,
+        snowmanW,
+        snowmanW * (snowman.height / snowman.width),
+      );
+
+      const igW = 200;
+      ctx.drawImage(
+        ig,
+        canvas.width / 2 - igW,
+        canvas.height - igW * (ig.height / ig.width) - 120,
+        igW,
+        igW * (ig.height / ig.width),
+      );
+
       ctx.textAlign = "center";
       ctx.fillStyle = "#C1C7CD";
       ctx.font = `900 ${fontSize}px "DynaPuff"`;
       ctx.textBaseline = "middle";
-      ctx.fillText(String(name), canvas.width / 2, canvas.height / 2);
+      ctx.fillText(String(name), canvas.width / 2, canvas.height / 2 - 120);
 
       ctx.save();
       ctx.beginPath();
@@ -259,10 +306,16 @@ const TheActualApp = () => {
   return (
     <div className="w-screen flex justify-center overflow-hidden flex-col items-center h-svh relative bg-[#0b0b0b] z-0 text-white">
       <div className="sm:w-200 w-full aspect-square flex justify-center items-center overflow-hidden">
-        <canvas
-          className="transition-all duration-500 ease-in w-9/10 sm:w-3/4 aspect-square backdrop-blur-[10px] border-4 border-white/20 rounded-full  shadow-[inset_50px_100px_50px_20px_rgba(255,255,255,0.3),inset_-50px_-100px_50px_20px_rgba(0,0,0,0.1),inset_0_0_200px_0px_rgba(200,200,255,0.5)]"
-          ref={canRef}
-        ></canvas>
+        <div className="relative w-9/10 sm:w-3/4 rounded-full aspect-square shadow-[inset_0_20px_20px_-10px_rgba(255,255,255,0.9),inset_20px_0_40px_rgba(255,255,255,0.4),inset_-20px_-30px_40px_rgba(50,0,0,0.1),inset_0_-2px_10px_rgba(255,255,255,0.3),inset_0_0_50px_20px_rgba(0,0,0,0.5),inset_50px_100px_50px_20px_rgba(255,255,255,0.3),inset_-50px_-100px_50px_20px_rgba(0,0,0,0.1),inset_0_0_200px_0px_rgba(200,200,255,0.5)]">
+          <canvas
+            className="transition-all z-100 absolute duration-500 ease-in w-full aspect-square backdrop-contrast-125 border-4 border-white/20 rounded-full  "
+            ref={canRef}
+          ></canvas>
+          <div
+            ref={blurRef}
+            className="w-full aspect-square absolute inset-0 rounded-full backdrop-blur-sm mask-[radial-gradient(circle,rgba(0,0,0,0)0%,rgba(0,0,0,1)66%)]"
+          ></div>
+        </div>
       </div>
       <button
         ref={butRef}
