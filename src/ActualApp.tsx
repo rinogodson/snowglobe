@@ -232,7 +232,7 @@ const TheActualApp = () => {
     if (!ctx) return;
     const btn = butRef.current;
 
-    const SNOW_COUNT = 5000;
+    const SNOW_COUNT = 1000;
 
     const gravity = 0.2;
 
