@@ -397,6 +397,10 @@ const TheActualApp = () => {
 
   return (
     <div className="w-screen flex justify-center overflow-hidden flex-col items-center h-svh relative bg-[#0b0b0b] z-0 text-white">
+      <img
+        src="/wish.svg"
+        className="absolute top-10 h-27 sm:h-40 sm:top-auto sm:bottom-10 sm:right-10"
+      />
       <div className="w-full max-w-[800px] aspect-square flex justify-center items-center overflow-hidden">
         <div className="relative w-9/10 sm:w-3/4 rounded-full aspect-square shadow-[inset_0_20px_20px_-10px_rgba(255,255,255,0.9),inset_20px_0_40px_rgba(255,255,255,0.4),inset_-20px_-30px_40px_rgba(50,0,0,0.1),inset_0_-2px_10px_rgba(255,255,255,0.3),inset_0_0_50px_20px_rgba(0,0,0,0.5),inset_50px_100px_50px_20px_rgba(255,255,255,0.3),inset_-50px_-100px_50px_20px_rgba(0,0,0,0.1),inset_0_0_200px_0px_rgba(200,200,255,0.5)]">
           <canvas
@@ -404,7 +408,7 @@ const TheActualApp = () => {
               rotate: flipped ? "180deg" : "0deg",
               transition: "all " + spring(0.5, 0.2),
             }}
-            className="transition-all z-100 absolute bg-white/10 duration-500 ease-in w-full aspect-square backdrop-contrast-125 border-4 border-white/20 rounded-full  "
+            className="transition-all z-100 absolute bg-white/10 duration-500 ease-in w-full aspect-square backdrop-contrast-125 border-4 border-white/50 rounded-full  "
             ref={canRef}
           ></canvas>
           <div
@@ -429,7 +433,7 @@ const TheActualApp = () => {
         muted
         loop
         playsInline
-        className="absolute h-full sm:w-full -z-1 object-cover "
+        className="absolute sm:brightness-90 brightness-50 h-full sm:w-full -z-1 object-cover "
       />
       <div
         style={{
