@@ -1,6 +1,11 @@
 import { spring } from "motion";
+import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
+import Modal from "./Modal";
+import { AnimatePresence } from "motion/react";
+import { BadgePlus, Snowflake } from "lucide-react";
+import DecodeOREncode from "./services";
 
 interface DeviceOrientationEventiOS extends DeviceOrientationEvent {
   requestPermission?: () => Promise<"granted" | "denied">;
@@ -133,18 +138,26 @@ class SnowFlake {
 const TheActualApp = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  let name = queryParams.get("name");
+  let name = queryParams.get("n");
+
   const isFlipped = useRef(false);
 
   const [flipped, setFlipped] = useState(false);
   const [showButton, setShowButton] = useState(true);
 
+  const [snowCount, setSnowCount] = useState(2000);
+
   const [permission, setPermission] = useState(false);
 
-  if (!name) name = "SnowGlobe";
+  let noName = false;
+  if (!name) {
+    name = "SnowGlobe";
+    noName = true;
+  }
   if (name.length > 14) {
     name = name.slice(0, 14);
   }
+  if (name != "SnowGlobe") name = DecodeOREncode(String(name));
 
   const canRef = useRef<HTMLCanvasElement | null>(null);
   const butRef = useRef<HTMLButtonElement>(null);
@@ -232,7 +245,7 @@ const TheActualApp = () => {
     if (!ctx) return;
     const btn = butRef.current;
 
-    const SNOW_COUNT = 2000;
+    const SNOW_COUNT = snowCount;
 
     const gravity = 0.2;
 
@@ -389,11 +402,15 @@ const TheActualApp = () => {
     }
 
     return () => {
+      snowflakes.current = [];
       btn.removeEventListener("click", handleBtn);
       cancelAnimationFrame(animationFrameId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fontLoaded, name]);
+  }, [fontLoaded, name, snowCount]);
+
+  const [showModal, setShowModal] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   return (
     <div className="w-screen flex justify-center overflow-hidden flex-col items-center h-svh relative bg-[#0b0b0b] z-0 text-white">
@@ -401,6 +418,75 @@ const TheActualApp = () => {
         src="/wish.svg"
         className="absolute top-10 h-27 sm:h-40 sm:top-auto sm:bottom-10 sm:right-10"
       />
+      <div className="absolute bottom-10 right-8 sm:left-8 sm:right-auto flex gap-2">
+        <AnimatePresence>
+          {showSettings && (
+            <motion.div
+              initial={{ opacity: 0, scaleY: 0, scaleX: 0.5 }}
+              animate={{ opacity: 1, scaleY: 1, scaleX: 1 }}
+              exit={{ opacity: 0, scaleY: 0, scaleX: 0.8 }}
+              className="absolute right-0 p-2 sm:origin-bottom-left origin-bottom-right flex justify-center items-center flex-col gap-1 sm:right-auto bottom-0 h-20 w-50 -translate-y-full z-1000 bg-green-700 rounded-[4rem] [corner-shape:squircle] shadow-[inset_0_1px_1px_1px_rgba(255,255,255,0.2),0_1px_3px_1px_rgba(0,0,0,0.1)]"
+            >
+              <p>Snow Flakes Count</p>
+              <div className="w-full h-1/2 bg-white/10 grid grid-cols-3 border border-white/20 rounded-full overflow-hidden">
+                <div
+                  style={{
+                    background:
+                      snowCount === 1000 ? "rgba(255, 255, 255, 0.5)" : "none",
+                  }}
+                  className="w-full h-full flex justify-center items-center font-bold"
+                  onClick={() => {
+                    setSnowCount(1000);
+                  }}
+                >
+                  1000
+                </div>
+                <div
+                  style={{
+                    background:
+                      snowCount === 2000 ? "rgba(255, 255, 255, 0.5)" : "none",
+                  }}
+                  className="w-full h-full flex justify-center items-center font-bold"
+                  onClick={() => {
+                    setSnowCount(2000);
+                  }}
+                >
+                  2000
+                </div>
+                <div
+                  style={{
+                    background:
+                      snowCount === 5000 ? "rgba(255, 255, 255, 0.5)" : "none",
+                  }}
+                  className="w-full h-full flex justify-center items-center font-bold"
+                  onClick={() => {
+                    setSnowCount(5000);
+                  }}
+                >
+                  5000
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <button
+          onClick={() => setShowSettings(!showSettings)}
+          className="active:scale-96 rounded-full p-3 bg-green-800 shadow-[inset_0_1px_1px_1px_rgba(255,255,255,0.2),0_1px_3px_1px_rgba(0,0,0,0.1)]"
+        >
+          <Snowflake size={35} className={showSettings ? "animate-spin" : ""} />
+        </button>
+        {noName && (
+          <button
+            onClick={() => setShowModal(!showModal)}
+            className=" active:scale-96 rounded-full p-3 bg-red-500 shadow-[inset_0_1px_1px_1px_rgba(255,255,255,0.2),0_1px_3px_1px_rgba(0,0,0,0.1)]"
+          >
+            <BadgePlus size={35} />
+          </button>
+        )}
+      </div>
+      <AnimatePresence>
+        {showModal && <Modal setFn={setShowModal} />}
+      </AnimatePresence>
       <div className="w-full max-w-[800px] aspect-square flex justify-center items-center overflow-hidden">
         <div className="relative w-9/10 sm:w-3/4 rounded-full aspect-square shadow-[inset_0_20px_20px_-10px_rgba(255,255,255,0.9),inset_20px_0_40px_rgba(255,255,255,0.4),inset_-20px_-30px_40px_rgba(50,0,0,0.1),inset_0_-2px_10px_rgba(255,255,255,0.3),inset_0_0_50px_20px_rgba(0,0,0,0.5),inset_50px_100px_50px_20px_rgba(255,255,255,0.3),inset_-50px_-100px_50px_20px_rgba(0,0,0,0.1),inset_0_0_200px_0px_rgba(200,200,255,0.5)]">
           <canvas
