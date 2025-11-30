@@ -514,7 +514,7 @@ const TheActualApp = () => {
           ></div>
           <div
             style={{ rotate: flipped ? "180deg" : "0deg" }}
-            className="w-full aspect-square border-2 border-white/30 absolute z-100 inset-0 rounded-full backdrop-blur-[10px] backdrop-contrast-130 backdrop-saturate-200 mask-[radial-gradient(circle,rgba(0,0,0,0)0%,rgba(0,0,0,1)90%)] sm:mask-[radial-gradient(circle,rgba(0,0,0,0)0%,rgba(0,0,0,1)90%)]"
+            className="w-full aspect-square border-2 border-white/30 absolute z-100 inset-0 rounded-full backdrop-blur-[10px] backdrop-contrast-130 backdrop-saturate-200  mask-[radial-gradient(circle,rgba(0,0,0,0)0%,rgba(0,0,0,1)90%)] sm:mask-[radial-gradient(circle,rgba(0,0,0,0)0%,rgba(0,0,0,1)90%)]"
           ></div>
         </div>
       </div>

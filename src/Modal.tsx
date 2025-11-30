@@ -34,10 +34,10 @@ function Modal({ setFn }: { setFn: React.Dispatch<SetStateAction<boolean>> }) {
       className="absolute bg-black/50 w-svw h-svh z-1000 flex justify-center items-center"
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0 }}
-        className="w-18/20 flex gap-3 flex-col sm:w-100 h-fit p-5 bg-red-500/90 backdrop-blur-sm rounded-[4rem] [corner-shape:squircle] shadow-[inset_0_1px_1px_1px_rgba(255,255,255,0.2),0_1px_3px_1px_rgba(0,0,0,0.1)]"
+        initial={{ opacity: 0, scale: 0, translateY: 200 }}
+        animate={{ opacity: 1, scale: 1, translateY: 0 }}
+        exit={{ opacity: 0, scale: 0, translateY: 200 }}
+        className="w-18/20 flex gap-3 origin-bottom-right sm:origin-bottom-left flex-col sm:w-100 h-fit p-5 bg-red-500/90 backdrop-blur-sm rounded-[4rem] [corner-shape:squircle] shadow-[inset_0_1px_1px_1px_rgba(255,255,255,0.2),0_1px_3px_1px_rgba(0,0,0,0.1)]"
       >
         <div className="flex flex-col gap-1">
           <div className="relative flex h-20 justify-between font-[Margarine] tracking-[1px]">
