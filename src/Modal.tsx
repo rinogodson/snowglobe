@@ -52,7 +52,7 @@ function Modal({ setFn }: { setFn: React.Dispatch<SetStateAction<boolean>> }) {
                   setValue(cleaned);
                 }
               }}
-              className="w-full absolute inset-0 bg-white/50 rounded-[2.75rem] [corner-shape:squircle] border border-white/20 text-3xl px-5 text-black font-bold"
+              className="w-full h-full absolute inset-0 bg-white/50 rounded-[2.75rem] [corner-shape:squircle] border border-white/20 text-3xl px-5 text-black font-bold"
             />
           </div>
           <div className="w-full justify-between flex">
