@@ -149,10 +149,8 @@ const TheActualApp = () => {
 
   const [permission, setPermission] = useState(false);
 
-  let noName = false;
   if (!name) {
     name = "SnowGlobe";
-    noName = true;
   }
   if (name.length > 14) {
     name = name.slice(0, 14);
@@ -486,14 +484,12 @@ const TheActualApp = () => {
         >
           <Snowflake size={35} className={showSettings ? "animate-spin" : ""} />
         </button>
-        {noName && (
-          <button
-            onClick={() => setShowModal(!showModal)}
-            className="cursor-pointer active:scale-96 rounded-full p-3 bg-red-500 shadow-[inset_0_1px_1px_1px_rgba(255,255,255,0.2),0_1px_3px_1px_rgba(0,0,0,0.1)]"
-          >
-            <BadgePlus size={35} />
-          </button>
-        )}
+        <button
+          onClick={() => setShowModal(!showModal)}
+          className="cursor-pointer active:scale-96 rounded-full p-3 bg-red-500 shadow-[inset_0_1px_1px_1px_rgba(255,255,255,0.2),0_1px_3px_1px_rgba(0,0,0,0.1)]"
+        >
+          <BadgePlus size={35} />
+        </button>
       </div>
       <AnimatePresence>
         {showModal && <Modal setFn={setShowModal} />}
