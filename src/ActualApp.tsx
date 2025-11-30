@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import Modal from "./Modal";
 import { AnimatePresence } from "motion/react";
-import { BadgePlus, Snowflake } from "lucide-react";
+import { BadgePlus, Lightbulb, LightbulbOff, Snowflake } from "lucide-react";
 import DecodeOREncode from "./services";
 
 interface DeviceOrientationEventiOS extends DeviceOrientationEvent {
@@ -182,8 +182,8 @@ const TheActualApp = () => {
       const beta = e.beta;
       if (beta === null) return;
       setShowButton((prev) => (prev ? false : prev));
-      const isUpsideDown = beta < -60;
-      const isUpright = beta > 60;
+      const isUpsideDown = beta < -20;
+      const isUpright = beta > 30;
       if (isUpsideDown && !isFlipped.current) {
         isFlipped.current = true;
         snowflakes.current.forEach((f: SnowFlake) => {
@@ -411,14 +411,24 @@ const TheActualApp = () => {
   }, [fontLoaded, name, snowCount]);
 
   const [showModal, setShowModal] = useState(false);
+  const [showVideo, setShowVideo] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
 
   return (
     <div className="w-screen flex justify-center overflow-hidden flex-col items-center h-svh relative bg-[#0b0b0b] z-0 text-white">
+      <p className="absolute bottom-30 sm:hidden right-[50%] translate-x-[50%] w-fit">
+        Try Flipping your phone.
+      </p>
       <img
         src="/wish.svg"
         className="absolute top-10 h-27 sm:h-40 sm:top-auto sm:bottom-10 sm:right-10"
       />
+      <button
+        onClick={() => setShowVideo(!showVideo)}
+        className="absolute sm:top-10 top-auto bottom-10 right-auto left-10 sm:right-10 sm:bottom-auto sm:left-auto cursor-pointer active:scale-96 rounded-full p-3 bg-white/10 backdrop-blur-sm shadow-[inset_0_1px_1px_1px_rgba(255,255,255,0.2),0_1px_3px_1px_rgba(0,0,0,0.1)]"
+      >
+        {!showVideo ? <LightbulbOff size={35} /> : <Lightbulb size={35} />}
+      </button>
       <div className="absolute bottom-10 right-8 sm:left-8 sm:right-auto flex gap-2">
         <AnimatePresence>
           {showSettings && (
@@ -426,7 +436,7 @@ const TheActualApp = () => {
               initial={{ opacity: 0, scaleY: 0, scaleX: 0.5 }}
               animate={{ opacity: 1, scaleY: 1, scaleX: 1 }}
               exit={{ opacity: 0, scaleY: 0, scaleX: 0.8 }}
-              className="absolute right-0 p-2 sm:origin-bottom-left origin-bottom-right flex justify-center items-center flex-col gap-1 sm:right-auto bottom-0 h-20 w-50 -translate-y-full z-1000 bg-green-700 rounded-[4rem] [corner-shape:squircle] shadow-[inset_0_1px_1px_1px_rgba(255,255,255,0.2),0_1px_3px_1px_rgba(0,0,0,0.1)]"
+              className="absolute right-0 p-2 sm:origin-bottom-left origin-bottom-right flex justify-center items-center flex-col gap-1 sm:right-auto bottom-0 h-20 w-50 -translate-y-full z-1000 bg-green-700 rounded-2xl shadow-[inset_0_1px_1px_1px_rgba(255,255,255,0.2),0_1px_3px_1px_rgba(0,0,0,0.1)]"
             >
               <p>Snow Flakes Count</p>
               <div className="w-full h-1/2 bg-white/10 grid grid-cols-3 border border-white/20 rounded-full overflow-hidden">
@@ -472,14 +482,14 @@ const TheActualApp = () => {
         </AnimatePresence>
         <button
           onClick={() => setShowSettings(!showSettings)}
-          className="hidden sm:flex active:scale-96 rounded-full p-3 bg-green-800 shadow-[inset_0_1px_1px_1px_rgba(255,255,255,0.2),0_1px_3px_1px_rgba(0,0,0,0.1)]"
+          className="cursor-pointer hidden sm:flex active:scale-96 rounded-full p-3 bg-green-800 shadow-[inset_0_1px_1px_1px_rgba(255,255,255,0.2),0_1px_3px_1px_rgba(0,0,0,0.1)]"
         >
           <Snowflake size={35} className={showSettings ? "animate-spin" : ""} />
         </button>
         {noName && (
           <button
             onClick={() => setShowModal(!showModal)}
-            className=" active:scale-96 rounded-full p-3 bg-red-500 shadow-[inset_0_1px_1px_1px_rgba(255,255,255,0.2),0_1px_3px_1px_rgba(0,0,0,0.1)]"
+            className="cursor-pointer active:scale-96 rounded-full p-3 bg-red-500 shadow-[inset_0_1px_1px_1px_rgba(255,255,255,0.2),0_1px_3px_1px_rgba(0,0,0,0.1)]"
           >
             <BadgePlus size={35} />
           </button>
@@ -507,21 +517,23 @@ const TheActualApp = () => {
       {showButton && (
         <button
           ref={butRef}
-          className=" bg-blue-600 sm:flex font-bold border-2 border-white/15 active:bg-blue-500 text-white  text-3xl rounded-full"
+          className="cursor-pointer bg-blue-600 sm:flex font-bold border-2 border-white/15 active:bg-blue-500 text-white  text-3xl rounded-full"
         >
           <p className="px-6 py-3 w-full h-full transition-all duration-200">
             Flip SnowGlobe
           </p>
         </button>
       )}
-      <video
-        src="/bg.mp4"
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="absolute sm:brightness-90 brightness-50 h-full sm:w-full -z-1 object-cover "
-      />
+      {showVideo && (
+        <video
+          src="/bg.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute sm:brightness-90 brightness-50 h-full sm:w-full -z-1 object-cover "
+        />
+      )}
       <div
         style={{
           fontFamily: '"DynaPuff"',

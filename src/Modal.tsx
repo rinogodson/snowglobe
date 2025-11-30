@@ -14,7 +14,10 @@ function Modal({ setFn }: { setFn: React.Dispatch<SetStateAction<boolean>> }) {
       return;
     }
     window.navigator.clipboard.writeText(
-      window.location.origin + "/?n=" + DecodeOREncode(value),
+      (window.location.origin + "/?n=" + DecodeOREncode(value)).replaceAll(
+        " ",
+        "%20",
+      ),
     );
 
     setCopied(true);
@@ -45,7 +48,7 @@ function Modal({ setFn }: { setFn: React.Dispatch<SetStateAction<boolean>> }) {
               placeholder="Only Alphabets"
               onChange={(e) => {
                 if (e.target.value.length <= 14) {
-                  const cleaned = e.target.value.replace(/[^A-Za-z ]/g, "");
+                  const cleaned = e.target.value.replace(/[^A-Za-z0-9 ]/g, "");
                   setValue(cleaned);
                 }
               }}
@@ -64,7 +67,7 @@ function Modal({ setFn }: { setFn: React.Dispatch<SetStateAction<boolean>> }) {
             onClick={() => {
               setFn(false);
             }}
-            className="active:bg-white/30 h-12 font-bold w-full flex gap-2 justify-center items-center bg-white/20 text-xl rounded-[2.75rem] [corner-shape:squircle] border border-white/20"
+            className="cursor-pointer active:bg-white/30 h-12 font-bold w-full flex gap-2 justify-center items-center bg-white/20 text-xl rounded-[2.75rem] [corner-shape:squircle] border border-white/20"
           >
             <X size={20} />
             Close
@@ -74,7 +77,7 @@ function Modal({ setFn }: { setFn: React.Dispatch<SetStateAction<boolean>> }) {
             style={{
               filter: copied ? "brightness(1.1)" : "brightness(auto)",
             }}
-            className="active:bg-blue-500 h-12 font-bold w-full flex gap-2 justify-center items-center bg-blue-500/90 text-xl rounded-[2.75rem] [corner-shape:squircle] border border-white/20"
+            className="cursor-pointer active:bg-blue-500 h-12 font-bold w-full flex gap-2 justify-center items-center bg-blue-500/90 text-xl rounded-[2.75rem] [corner-shape:squircle] border border-white/20"
           >
             {copied ? <Check size={20} /> : <Copy size={20} />}
             {copied ? "Copied" : "Copy"}
