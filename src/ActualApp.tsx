@@ -505,7 +505,7 @@ const TheActualApp = () => {
               rotate: flipped ? "180deg" : "0deg",
               transition: "all " + spring(0.5, 0.2),
             }}
-            className="transition-all z-100 absolute bg-white/10 duration-500 ease-in w-full aspect-square backdrop-contrast-125 border-4 border-white/50 rounded-full  "
+            className="transition-all z-100 sm:saturate-100 saturate-150 absolute bg-white/10 duration-500 ease-in w-full aspect-square backdrop-contrast-125 border-4 border-white/50 rounded-full  "
             ref={canRef}
           ></canvas>
           <div
@@ -514,7 +514,7 @@ const TheActualApp = () => {
           ></div>
           <div
             style={{ rotate: flipped ? "180deg" : "0deg" }}
-            className="w-full aspect-square border-2 border-white/30 absolute z-100 inset-0 rounded-full backdrop-blur-[10px] backdrop-contrast-130 backdrop-saturate-200 mask-[radial-gradient(circle,rgba(0,0,0,0)0%,rgba(0,0,0,1)90%)]"
+            className="w-full aspect-square border-2 border-white/30 absolute z-100 inset-0 rounded-full backdrop-blur-[10px] backdrop-contrast-130 backdrop-saturate-200 mask-[radial-gradient(circle,rgba(0,0,0,0)0%,rgba(0,0,0,1)90%)] sm:mask-[radial-gradient(circle,rgba(0,0,0,0)0%,rgba(0,0,0,1)90%)]"
           ></div>
         </div>
       </div>
@@ -535,7 +535,7 @@ const TheActualApp = () => {
           muted
           loop
           playsInline
-          className="absolute sm:brightness-90 brightness-50 h-full sm:w-full -z-1 object-cover "
+          className="absolute sm:brightness-90 brightness-80 h-full sm:w-full -z-1 object-cover "
         />
       )}
       <div
