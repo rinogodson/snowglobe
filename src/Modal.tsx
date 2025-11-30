@@ -21,6 +21,9 @@ function Modal({ setFn }: { setFn: React.Dispatch<SetStateAction<boolean>> }) {
     );
 
     setCopied(true);
+    alert(
+      "🎄 Now you can share this X'mas gift with your loved ones!! 🎅🏼 Merry Christmas!!",
+    );
     setTimeout(() => {
       setCopied(false);
     }, 2000);
