@@ -472,7 +472,7 @@ const TheActualApp = () => {
         </AnimatePresence>
         <button
           onClick={() => setShowSettings(!showSettings)}
-          className="active:scale-96 rounded-full p-3 bg-green-800 shadow-[inset_0_1px_1px_1px_rgba(255,255,255,0.2),0_1px_3px_1px_rgba(0,0,0,0.1)]"
+          className="hidden sm:flex active:scale-96 rounded-full p-3 bg-green-800 shadow-[inset_0_1px_1px_1px_rgba(255,255,255,0.2),0_1px_3px_1px_rgba(0,0,0,0.1)]"
         >
           <Snowflake size={35} className={showSettings ? "animate-spin" : ""} />
         </button>
