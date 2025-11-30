@@ -1,3 +1,6 @@
+<img width="662" height="657" alt="image" src="https://github.com/user-attachments/assets/7c56874d-ddd2-4189-94d5-b1c7241bda97" />
+
+
 ## 🔮 SnowGlobe | A Gift to your loved ones! 
 Stack: ReactJS, TailwindCSS
 
