@@ -327,6 +327,7 @@ const TheActualApp = () => {
       isFlipped.current = !isFlipped.current;
       if (!permission) {
         handleRequestPermission();
+        return;
       }
       setFlipped(isFlipped.current);
       snowflakes.current.forEach((f) => {
